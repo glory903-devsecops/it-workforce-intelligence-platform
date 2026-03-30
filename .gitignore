@@ -23,3 +23,9 @@ docker-compose.override.yml
 .vscode/settings.json
 .vscode/tasks.json
 .vscode/launch.json
+
+# Python test
+.pytest_cache/
+
+# Local test DB
+backend/test.db

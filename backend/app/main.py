@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import crud, models, schemas
-from .database import Base, async_session, engine
+from .database import Base, async_session, get_async_session, engine
 
 app = FastAPI(
     title="IT Workforce Intelligence Platform API",
@@ -84,56 +84,56 @@ async def health_check():
     return {"status": "ok", "service": "it-workforce-intelligence-api"}
 
 @app.post("/task-logs", response_model=schemas.TaskLogRead)
-async def create_task_log(task_log: schemas.TaskLogCreate, db: AsyncSession = Depends(async_session)):
+async def create_task_log(task_log: schemas.TaskLogCreate, db: AsyncSession = Depends(get_async_session)):
     return await crud.create_task_log(db, task_log)
 
 @app.post("/task-logs/validate", response_model=list[schemas.QualityIssueResult])
-async def validate_task_log(task_log: schemas.TaskLogCreate, db: AsyncSession = Depends(async_session)):
+async def validate_task_log(task_log: schemas.TaskLogCreate, db: AsyncSession = Depends(get_async_session)):
     return await crud.validate_task_log(db, task_log)
 
 @app.get("/task-logs", response_model=list[schemas.TaskLogRead])
-async def list_task_logs(skip: int = 0, limit: int = 50, db: AsyncSession = Depends(async_session)):
+async def list_task_logs(skip: int = 0, limit: int = 50, db: AsyncSession = Depends(get_async_session)):
     return await crud.get_task_logs(db, skip, limit)
 
 @app.get("/domains", response_model=list[schemas.DomainRead])
-async def list_domains(db: AsyncSession = Depends(async_session)):
+async def list_domains(db: AsyncSession = Depends(get_async_session)):
     return await crud.get_master_items(db, models.Domain)
 
 @app.get("/capabilities", response_model=list[schemas.CapabilityRead])
-async def list_capabilities(db: AsyncSession = Depends(async_session)):
+async def list_capabilities(db: AsyncSession = Depends(get_async_session)):
     return await crud.get_master_items(db, models.Capability)
 
 @app.get("/activities", response_model=list[schemas.ActivityRead])
-async def list_activities(db: AsyncSession = Depends(async_session)):
+async def list_activities(db: AsyncSession = Depends(get_async_session)):
     return await crud.get_master_items(db, models.Activity)
 
 @app.get("/work-types", response_model=list[schemas.WorkTypeRead])
-async def list_work_types(db: AsyncSession = Depends(async_session)):
+async def list_work_types(db: AsyncSession = Depends(get_async_session)):
     return await crud.get_master_items(db, models.WorkType)
 
 @app.get("/systems", response_model=list[schemas.SystemRead])
-async def list_systems(db: AsyncSession = Depends(async_session)):
+async def list_systems(db: AsyncSession = Depends(get_async_session)):
     return await crud.get_master_items(db, models.System)
 
 @app.get("/teams", response_model=list[schemas.TeamRead])
-async def list_teams(db: AsyncSession = Depends(async_session)):
+async def list_teams(db: AsyncSession = Depends(get_async_session)):
     return await crud.get_master_items(db, models.Team)
 
 @app.get("/employees", response_model=list[schemas.EmployeeRead])
-async def list_employees(db: AsyncSession = Depends(async_session)):
+async def list_employees(db: AsyncSession = Depends(get_async_session)):
     return await crud.get_master_items(db, models.Employee)
 
 @app.post("/budget-forecasts", response_model=schemas.BudgetForecastRead)
 async def create_budget_forecast(
     forecast: schemas.BudgetForecastCreate,
-    db: AsyncSession = Depends(async_session),
+    db: AsyncSession = Depends(get_async_session),
 ):
     return await crud.create_budget_forecast(db, forecast)
 
 @app.get("/budget-forecasts", response_model=list[schemas.BudgetForecastRead])
-async def list_budget_forecasts(skip: int = 0, limit: int = 50, db: AsyncSession = Depends(async_session)):
+async def list_budget_forecasts(skip: int = 0, limit: int = 50, db: AsyncSession = Depends(get_async_session)):
     return await crud.get_budget_forecasts(db, skip, limit)
 
 @app.get("/data-quality-issues", response_model=list[schemas.DataQualityIssueRead])
-async def list_data_quality_issues(skip: int = 0, limit: int = 50, db: AsyncSession = Depends(async_session)):
+async def list_data_quality_issues(skip: int = 0, limit: int = 50, db: AsyncSession = Depends(get_async_session)):
     return await crud.get_data_quality_issues(db, skip, limit)

@@ -452,8 +452,23 @@ Metabase
    - `cd frontend`
    - `npm install`
    - `npm run dev`
+4. 기본 로컬 URL
+   - 프론트엔드: [http://localhost:5173](http://localhost:5173)
+   - 백엔드: [http://localhost:8000](http://localhost:8000)
+5. GitHub Pages 데모 URL
+   - [https://glory903-devsecops.github.io/it-workforce-intelligence-platform](https://glory903-devsecops.github.io/it-workforce-intelligence-platform)
 
-### 18.3 API 엔드포인트 예시
+### 18.3 데모 & 대시보드 바로가기
+
+- 웹 데모(프론트엔드): [https://glory903-devsecops.github.io/it-workforce-intelligence-platform](https://glory903-devsecops.github.io/it-workforce-intelligence-platform)
+- 로컬 프론트엔드: [http://localhost:5173](http://localhost:5173)
+- 로컬 백엔드 API: [http://localhost:8000](http://localhost:8000)
+
+<p align="center">
+  <a href="https://glory903-devsecops.github.io/it-workforce-intelligence-platform" target="_blank">🚀 데모 웹사이트 바로가기</a>
+</p>
+
+### 18.4 API 엔드포인트 예시
 
 - `GET /` : 헬스 체크
 - `POST /task-logs` : Task Log 기록 생성

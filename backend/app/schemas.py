@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Optional
 from pydantic import BaseModel
 
 class TaskLogBase(BaseModel):
@@ -12,10 +13,10 @@ class TaskLogBase(BaseModel):
     work_type_id: int
     system_id: int
     hours: float
-    difficulty: str | None = None
-    recurrence: str | None = None
-    impact: str | None = None
-    notes: str | None = None
+    difficulty: Optional[str] = None
+    recurrence: Optional[str] = None
+    impact: Optional[str] = None
+    notes: Optional[str] = None
 
 class TaskLogCreate(TaskLogBase):
     pass
@@ -30,7 +31,7 @@ class TaskLogRead(TaskLogBase):
 class DomainRead(BaseModel):
     id: int
     name: str
-    description: str | None = None
+    description: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -39,7 +40,7 @@ class CapabilityRead(BaseModel):
     id: int
     domain_id: int
     name: str
-    description: str | None = None
+    description: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -48,7 +49,7 @@ class ActivityRead(BaseModel):
     id: int
     capability_id: int
     name: str
-    description: str | None = None
+    description: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -56,7 +57,7 @@ class ActivityRead(BaseModel):
 class WorkTypeRead(BaseModel):
     id: int
     name: str
-    description: str | None = None
+    description: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -64,7 +65,7 @@ class WorkTypeRead(BaseModel):
 class SystemRead(BaseModel):
     id: int
     name: str
-    description: str | None = None
+    description: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -72,7 +73,7 @@ class SystemRead(BaseModel):
 class TeamRead(BaseModel):
     id: int
     name: str
-    department_id: int | None = None
+    department_id: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -81,7 +82,7 @@ class EmployeeRead(BaseModel):
     id: int
     name: str
     workforce_type: str
-    team_id: int | None = None
+    team_id: Optional[int] = None
 
     class Config:
         orm_mode = True
@@ -94,7 +95,7 @@ class DataQualityIssueRead(BaseModel):
     id: int
     task_log_id: int
     issue_type: str
-    description: str | None = None
+    description: Optional[str] = None
     status: str
     created_at: datetime
 
@@ -106,8 +107,8 @@ class BudgetForecastBase(BaseModel):
     total_hours: float
     forecast_type: str
     workforce_type: str = "정규직"
-    hourly_rate: float | None = None
-    notes: str | None = None
+    hourly_rate: Optional[float] = None
+    notes: Optional[str] = None
 
 class BudgetForecastCreate(BudgetForecastBase):
     pass
@@ -118,7 +119,7 @@ class BudgetForecastRead(BaseModel):
     total_hours: float
     total_cost: float
     forecast_type: str
-    notes: str | None = None
+    notes: Optional[str] = None
     created_at: datetime
 
     class Config:

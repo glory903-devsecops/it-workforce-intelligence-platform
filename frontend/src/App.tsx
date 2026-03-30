@@ -127,9 +127,9 @@ function App() {
 
   useEffect(() => {
     if (page === "quality") {
-      fetchDataQualityIssues()
+      fetchQualityIssues()
         .then(setQualityIssues)
-        .catch((error) => {
+        .catch((error: unknown) => {
           console.error(error);
           setMessage("데이터 품질 이슈를 불러오는 중 오류가 발생했습니다.");
         });
@@ -138,7 +138,7 @@ function App() {
     if (page === "budget") {
       fetchBudgetForecasts()
         .then(setForecasts)
-        .catch((error) => {
+        .catch((error: unknown) => {
           console.error(error);
           setMessage("예산 예측 목록을 불러오는 중 오류가 발생했습니다.");
         });
