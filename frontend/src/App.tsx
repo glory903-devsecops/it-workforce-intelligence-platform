@@ -77,6 +77,96 @@ function App() {
     (item) => item.capability_id === taskLog.capability_id,
   );
 
+  const qualitySummary = {
+    totalIssues: qualityIssues.length,
+    openIssues: qualityIssues.filter((item) => item.status === "OPEN").length,
+    latestIssueDate:
+      qualityIssues
+        .map((item) => new Date(item.created_at))
+        .sort((a, b) => b.getTime() - a.getTime())[0]
+        ?.toLocaleString() ?? "-",
+  };
+
+  const budgetSummary = {
+    totalForecasts: forecasts.length,
+    totalProjectedCost: forecasts.reduce(
+      (sum, item) => sum + item.total_cost,
+      0,
+    ),
+    averageHours:
+      forecasts.length > 0
+        ? forecasts.reduce((sum, item) => sum + item.total_hours, 0) /
+          forecasts.length
+        : 0,
+  };
+
+  const csvEscape = (value: string | number | undefined) => {
+    const text = value === undefined || value === null ? "" : String(value);
+    return `"${text.replace(/"/g, '""')}"`;
+  };
+
+  const downloadCsv = (
+    filename: string,
+    headers: string[],
+    rows: Array<Array<string | number | undefined>>,
+  ) => {
+    const csvRows = [
+      headers.join(","),
+      ...rows.map((row) => row.map(csvEscape).join(",")),
+    ];
+    const blob = new Blob([csvRows.join("\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportQualityIssuesCsv = () => {
+    const headers = [
+      "이슈 ID",
+      "업무 기록 ID",
+      "이슈 유형",
+      "설명",
+      "상태",
+      "생성일",
+    ];
+    const rows = qualityIssues.map((issue) => [
+      issue.id,
+      issue.task_log_id,
+      issue.issue_type,
+      issue.description ?? "",
+      issue.status,
+      new Date(issue.created_at).toLocaleString(),
+    ]);
+    downloadCsv("quality-issues.csv", headers, rows);
+  };
+
+  const exportForecastsCsv = () => {
+    const headers = [
+      "예측 ID",
+      "연도",
+      "총 예상 시간",
+      "예측 방식",
+      "총 비용",
+      "메모",
+      "생성일",
+    ];
+    const rows = forecasts.map((forecast) => [
+      forecast.id,
+      forecast.year,
+      forecast.total_hours,
+      forecast.forecast_type,
+      forecast.total_cost,
+      forecast.notes ?? "",
+      new Date(forecast.created_at).toLocaleString(),
+    ]);
+    downloadCsv("budget-forecasts.csv", headers, rows);
+  };
+
   useEffect(() => {
     async function loadMetadata() {
       try {
@@ -232,6 +322,30 @@ function App() {
         <p>Capability 기반 업무 기록 · 분석 · 예산 예측</p>
       </header>
 
+      <div className="hero-cards">
+        <article className="info-card">
+          <h3>사용자</h3>
+          <p>
+            일일 업무를 표준화된 항목으로 기록하고, 인력/도메인/활동별로 투입
+            시간을 정량화합니다.
+          </p>
+        </article>
+        <article className="info-card">
+          <h3>관리자</h3>
+          <p>
+            품질 이슈를 모니터링하고, 데이터 정합성을 확인하며 예산 예측 값을
+            검토합니다.
+          </p>
+        </article>
+        <article className="info-card">
+          <h3>예산 담당자</h3>
+          <p>
+            예측된 시간과 비용을 기반으로 향후 인력 배치와 예산 산정을
+            준비합니다.
+          </p>
+        </article>
+      </div>
+
       <nav className="page-tabs">
         <button
           className={page === "log" ? "active" : ""}
@@ -257,6 +371,11 @@ function App() {
         {page === "log" && (
           <section className="panel">
             <h2>일일 업무 기록</h2>
+            <p className="panel-description">
+              날짜, 직원, 팀, 도메인, 활동, 시스템과 투입 시간을 입력하고
+              저장하세요. 입력 정보는 백엔드에 기록되어 품질 모니터 및 예산
+              예측에 활용됩니다.
+            </p>
             <div className="form-grid">
               <label>
                 날짜
@@ -438,6 +557,33 @@ function App() {
         {page === "quality" && (
           <section className="panel">
             <h2>품질 모니터</h2>
+            <p className="panel-description">
+              입력된 업무 기록의 품질 문제를 확인하고, 관리자는 문제 원인을
+              파악해 데이터를 개선할 수 있습니다.
+            </p>
+            <div className="panel-actions">
+              <div className="metrics-grid">
+                <article className="metric-card">
+                  <strong>전체 이슈</strong>
+                  <p>{qualitySummary.totalIssues}</p>
+                </article>
+                <article className="metric-card">
+                  <strong>Open 이슈</strong>
+                  <p>{qualitySummary.openIssues}</p>
+                </article>
+                <article className="metric-card">
+                  <strong>최근 등록</strong>
+                  <p>{qualitySummary.latestIssueDate}</p>
+                </article>
+              </div>
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={exportQualityIssuesCsv}
+              >
+                CSV 다운로드
+              </button>
+            </div>
             {qualityIssues.length === 0 ? (
               <p>현재 데이터 품질 이슈가 없습니다.</p>
             ) : (
@@ -474,6 +620,33 @@ function App() {
         {page === "budget" && (
           <section className="panel">
             <h2>예산 예측</h2>
+            <p className="panel-description">
+              과거 투입 시간과 단가를 기반으로 연간 예산을 예측합니다. 관리자는
+              예측 결과를 팀별 예산 계획에 활용할 수 있습니다.
+            </p>
+            <div className="panel-actions">
+              <div className="metrics-grid">
+                <article className="metric-card">
+                  <strong>예측 개수</strong>
+                  <p>{budgetSummary.totalForecasts}</p>
+                </article>
+                <article className="metric-card">
+                  <strong>총 예상 비용</strong>
+                  <p>{budgetSummary.totalProjectedCost.toLocaleString()}원</p>
+                </article>
+                <article className="metric-card">
+                  <strong>평균 예상 시간</strong>
+                  <p>{budgetSummary.averageHours.toFixed(1)}h</p>
+                </article>
+              </div>
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={exportForecastsCsv}
+              >
+                CSV 다운로드
+              </button>
+            </div>
             <div className="form-grid">
               <label>
                 연도
