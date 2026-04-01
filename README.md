@@ -2,7 +2,7 @@
 
 2026 운영 데이터 기반 2027 IT 예산 산정을 위한 리소스 분석 및 표준화 플랫폼
 
-[![Demo Site](https://img.shields.io/badge/Demo-Site-blue?style=for-the-badge&logo=github)](https://glory1994.github.io/it-workforce-intelligence-platform/)
+[![Demo Site](https://img.shields.io/badge/Demo-Site-blue?style=for-the-badge&logo=github)](https://glory903-devsecops.github.io/it-workforce-intelligence-platform/)
 
 ## Overview
 
