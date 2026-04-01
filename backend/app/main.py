@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .database import Base, engine
+from .database import Base, engine, async_session
 from .routers import router
 from .use_cases import seed_initial_data as use_case_seed_initial_data
 from .context7 import Context7
@@ -23,7 +23,8 @@ app.add_middleware(
 app.include_router(router)
 
 async def seed_initial_data():
-    return await use_case_seed_initial_data()
+    async with async_session() as session:
+        await use_case_seed_initial_data(session)
 
 @app.on_event("startup")
 async def on_startup():
