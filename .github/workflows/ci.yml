@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  pages: write
+
 jobs:
   test:
     name: Test backend and frontend build
@@ -70,3 +74,11 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./frontend/dist
           publish_branch: gh-pages
+
+      - name: Enable GitHub Pages site
+        run: |
+          curl -X PUT \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pages \
+            -d '{"source":{"branch":"gh-pages","path":"/"}}'
