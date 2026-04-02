@@ -1,1 +1,1 @@
-# Backend package initializer
+"""MIDAS SW Sales Workforce Intelligence Platform — Backend Package."""

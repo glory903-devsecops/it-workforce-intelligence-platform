@@ -1,7 +1,12 @@
+"""SQLAlchemy ORM models for MIDAS SW Sales Workforce Intelligence Platform."""
+
 from datetime import datetime
-from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    Column, Date, DateTime, Float, ForeignKey, Integer, String, Text,
+)
 from sqlalchemy.orm import relationship
 from .database import Base
+
 
 class Department(Base):
     __tablename__ = "departments"
@@ -9,26 +14,36 @@ class Department(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(128), unique=True, nullable=False)
     description = Column(Text, nullable=True)
+
     teams = relationship("Team", back_populates="department")
+
 
 class Team(Base):
     __tablename__ = "teams"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(128), nullable=False)
+    region = Column(String(64), nullable=True)
     department_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
+
     department = relationship("Department", back_populates="teams")
     employees = relationship("Employee", back_populates="team")
+
 
 class Employee(Base):
     __tablename__ = "employees"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(128), nullable=False)
+    employee_code = Column(String(32), nullable=True, unique=True)
     workforce_type = Column(String(64), nullable=False)
+    position = Column(String(64), nullable=True)
+    region = Column(String(64), nullable=True)
     team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
+
     team = relationship("Team", back_populates="employees")
     task_logs = relationship("TaskLog", back_populates="employee")
+
 
 class System(Base):
     __tablename__ = "systems"
@@ -36,7 +51,9 @@ class System(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(128), nullable=False, unique=True)
     description = Column(Text, nullable=True)
+
     task_logs = relationship("TaskLog", back_populates="system")
+
 
 class Domain(Base):
     __tablename__ = "domains"
@@ -44,7 +61,9 @@ class Domain(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(128), nullable=False, unique=True)
     description = Column(Text, nullable=True)
+
     capabilities = relationship("Capability", back_populates="domain")
+
 
 class Capability(Base):
     __tablename__ = "capabilities"
@@ -53,9 +72,11 @@ class Capability(Base):
     domain_id = Column(Integer, ForeignKey("domains.id"), nullable=False)
     name = Column(String(128), nullable=False)
     description = Column(Text, nullable=True)
+
     domain = relationship("Domain", back_populates="capabilities")
     activities = relationship("Activity", back_populates="capability")
     task_logs = relationship("TaskLog", back_populates="capability")
+
 
 class Activity(Base):
     __tablename__ = "activities"
@@ -64,8 +85,10 @@ class Activity(Base):
     capability_id = Column(Integer, ForeignKey("capabilities.id"), nullable=False)
     name = Column(String(128), nullable=False)
     description = Column(Text, nullable=True)
+
     capability = relationship("Capability", back_populates="activities")
     task_logs = relationship("TaskLog", back_populates="activity")
+
 
 class WorkType(Base):
     __tablename__ = "work_types"
@@ -73,7 +96,9 @@ class WorkType(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(64), nullable=False, unique=True)
     description = Column(Text, nullable=True)
+
     task_logs = relationship("TaskLog", back_populates="work_type")
+
 
 class TaskLog(Base):
     __tablename__ = "task_logs"
@@ -103,6 +128,7 @@ class TaskLog(Base):
     work_type = relationship("WorkType", back_populates="task_logs")
     system = relationship("System", back_populates="task_logs")
 
+
 class DataQualityIssue(Base):
     __tablename__ = "data_quality_issues"
 
@@ -113,13 +139,19 @@ class DataQualityIssue(Base):
     status = Column(String(64), nullable=False, default="OPEN")
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
+
 class BudgetForecast(Base):
     __tablename__ = "budget_forecasts"
 
     id = Column(Integer, primary_key=True, index=True)
     year = Column(Integer, nullable=False)
+    region = Column(String(64), nullable=True)
+    team_name = Column(String(128), nullable=True)
+    workforce_type = Column(String(64), nullable=True)
+    domain_name = Column(String(128), nullable=True)
     total_hours = Column(Float, nullable=False)
     total_cost = Column(Float, nullable=False)
+    headcount_fte = Column(Float, nullable=True)
     forecast_type = Column(String(64), nullable=False)
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

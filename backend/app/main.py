@@ -1,15 +1,16 @@
+"""FastAPI application entry point — MIDAS SW Sales Workforce Intelligence Platform."""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import Base, engine, async_session
 from .routers import router
-from .use_cases import seed_initial_data as use_case_seed_initial_data
-from .context7 import Context7
+from .use_cases import seed_initial_data
 
 app = FastAPI(
-    title="IT Workforce Intelligence Platform API",
-    description="FastAPI backend for task log, quality monitoring, and budget forecast",
-    version="0.1.0",
+    title="MIDAS SW Sales Workforce Intelligence API",
+    description="마이다스 SW 영업 인력 리소스 분석 및 2026 예산 예측 플랫폼 API",
+    version="2.0.0",
 )
 
 app.add_middleware(
@@ -22,22 +23,16 @@ app.add_middleware(
 
 app.include_router(router)
 
-async def seed_initial_data():
-    async with async_session() as session:
-        await use_case_seed_initial_data(session)
 
 @app.on_event("startup")
 async def on_startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    await seed_initial_data()
 
-    app.state.context7 = Context7(user="system", team="default", project="workspace")
+    async with async_session() as session:
+        await seed_initial_data(session)
 
 
 @app.get("/status")
 async def status_check():
-    return {"status": "ok", "service": "it-workforce-intelligence-api"}
-
-
-
+    return {"status": "ok", "service": "midas-sw-sales-workforce-api"}
