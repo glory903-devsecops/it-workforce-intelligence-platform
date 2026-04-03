@@ -1,31 +1,9 @@
-# Node
 node_modules/
-/dist
-/build
-
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
+dist/
 .venv/
-venv/
+__pycache__/
+*.pyc
+*.db
 .env
-.env.*
-
-# System
-.DS_Store
-
-# Docker
-docker-compose.override.yml
-
-# IDE
-.vscode/settings.json
-.vscode/tasks.json
-.vscode/launch.json
-
-# Python test
 .pytest_cache/
-
-# Local test DB
-backend/test.db
+*.egg-info/

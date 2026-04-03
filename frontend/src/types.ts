@@ -38,13 +38,17 @@ export interface Activity {
 export interface Team {
   id: number;
   name: string;
+  region?: string;
   department_id?: number;
 }
 
 export interface Employee {
   id: number;
   name: string;
+  employee_code?: string;
   workforce_type: string;
+  position?: string;
+  region?: string;
   team_id?: number;
 }
 
@@ -86,8 +90,13 @@ export interface BudgetForecastCreate {
 export interface BudgetForecastRead {
   id: number;
   year: number;
+  region?: string;
+  team_name?: string;
+  workforce_type?: string;
+  domain_name?: string;
   total_hours: number;
   total_cost: number;
+  headcount_fte?: number;
   forecast_type: string;
   notes?: string;
   created_at: string;
