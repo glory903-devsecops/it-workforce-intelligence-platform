@@ -195,8 +195,12 @@ def _generate_employee_name(index: int) -> str:
     return f"{last}{first}{suffix}"
 
 
-async def seed_initial_data(db):
-    """Seed MIDAS SW Sales workforce data — 300 employees, 10 regions, 2025 task logs."""
+async def seed_initial_data(db, skip_task_logs: bool = False):
+    """Seed MIDAS SW Sales workforce data — 300 employees, 10 regions, 2025 task logs.
+    
+    Args:
+        skip_task_logs: If True, skip generating 2025 task log data (for fast tests).
+    """
     existing = await get_master_items(db, models.Domain)
     if existing:
         return  # already seeded
@@ -345,6 +349,9 @@ async def seed_initial_data(db):
         systems.append(s)
 
     # ── 2025 Task Logs (full year) ──────────────────────────────────────
+    if skip_task_logs:
+        return  # For fast tests, skip task log generation
+
     random.seed(42)  # reproducible
     start_date = date(2025, 1, 1)
     end_date = date(2025, 12, 31)
