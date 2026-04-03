@@ -1,73 +1,105 @@
-# IT Workforce Intelligence Platform
+# 🏢 MIDAS SW Sales Workforce Intelligence Platform
 
-2026 운영 데이터 기반 2027 IT 예산 산정을 위한 리소스 분석 및 표준화 플랫폼
+> **마이다스(MIDAS) SW 영업 인력 리소스 분석 및 2026 예산 예측 플랫폼**
 
-[![Demo Site](https://img.shields.io/badge/Demo-Site-blue?style=for-the-badge&logo=github)](https://glory903-devsecops.github.io/it-workforce-intelligence-platform/)
+전국 10개 지역, 300명 SW 영업 담당자의 업무 리소스를 데이터 기반으로 분석하고, 2025년 운영 실적을 기반으로 2026년 예산안을 자동 산출하는 의사결정 지원 플랫폼입니다.
 
-## Overview
+---
 
-IT Workforce Intelligence Platform은 IT 인력의 업무 시간을 동일한 기준으로 기록하고, Capability 기반으로 정규화하여 운영 리소스와 비용 구조를 분석하는 데이터 기반 의사결정 플랫폼입니다.
+## 📊 주요 기능
 
-이 저장소의 자세한 프로젝트 계획, 데이터 모델, 워크플로우, 특징 및 개발 전략은 `docs/project_plan.md`에서 확인할 수 있습니다.
+| 기능 | 설명 |
+|------|------|
+| **대시보드** | KPI 카드 + 월별/지역별/업무유형/도메인별 차트 |
+| **업무 기록** | 영업 담당자의 일일 업무를 표준화된 항목으로 기록 |
+| **품질 모니터** | 데이터 입력 오류 자동 감지 및 추적 |
+| **예산 예측** | 2025년 실적 기반 2026년 예산 자동 산출 (5% 성장률) |
+| **영업 인력** | 300명 영업 담당자 검색/필터 (지역/인력유형) |
 
-## Demo Recording
+## 💰 시간당 비용 기준
 
-![Demo Capture](frontend/video/demo_capture.png)
+| 인력 유형 | 시간당 비용 |
+|----------|-----------|
+| 정규직 | 30,000원 |
+| 계약직 | 30,000원 |
+| 외주 | 90,000원 |
 
-- 녹화 파일: [frontend/video/56ca75d111e0887749f685c9977aecfa.webm](frontend/video/56ca75d111e0887749f685c9977aecfa.webm)
-- 이 영상은 로컬 프론트엔드가 실행된 상태에서 주요 기능을 테스트한 화면을 보여줍니다.
+## 🛠️ 기술 스택
 
-## How to Use
+- **Backend**: Python + FastAPI + SQLAlchemy (Async) + SQLite
+- **Frontend**: React 18 + Vite + Tailwind CSS v4 + Recharts
+- **Testing**: Pytest (39 unit tests ✅)
+- **Deployment**: GitHub Actions → GitHub Pages (Mock 데이터 기반 데모)
+- **Design**: MIDAS 네이비(#1B3A6B) + 골드(#F5A623) 브랜딩
 
-### 사용자 역할
-
-- **업무 기록** 탭에서 날짜, 직원, 팀, 도메인, Capability, Activity, 시스템, 시간, 난이도, 반복 주기, 영향도, 메모를 입력합니다.
-- `기록 저장` 버튼을 누르면 Task Log가 서버에 저장됩니다.
-- 입력한 기록은 품질 모니터링과 예산 예측에 활용됩니다.
-
-### 관리자 역할
-
-- **품질 모니터** 탭에서 데이터 품질 이슈를 확인하고, 문제가 발생한 기록을 점검합니다.
-- **예산 예측** 탭에서 예측 항목을 입력하고 저장해, 비용 기반의 예산 계획을 수립합니다.
-- 관리자는 마스터 데이터와 입력 기준을 개선하여 전체 데이터 품질을 높일 수 있습니다.
-
-## Quick Start
+## 🚀 로컬 실행
 
 ### Backend
-
 ```bash
 cd backend
 pip install -r requirements.txt
-DATABASE_URL='sqlite+aiosqlite:///./local_test.db' uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+서버 최초 실행 시 300명 영업 인력 + 2025년 업무 데이터가 자동 시딩됩니다.
 
 ### Frontend
-
 ```bash
 cd frontend
 npm install
-npm run dev -- --host 0.0.0.0 --port 5173
+VITE_API_BASE=http://localhost:8000 npm run dev
 ```
 
-### Local URLs
+### 테스트 실행
+```bash
+cd backend
+pip install -r requirements-dev.txt
+python -m pytest tests/ -v
+```
 
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
+## 📁 프로젝트 구조
 
-## Frontend / Backend 연결
+```
+├── backend/
+│   ├── app/
+│   │   ├── main.py          # FastAPI entrypoint + startup seed
+│   │   ├── models.py         # SQLAlchemy ORM models
+│   │   ├── schemas.py        # Pydantic v2 schemas
+│   │   ├── repository.py     # DB query layer
+│   │   ├── routers.py        # API endpoints
+│   │   ├── use_cases.py      # Business logic + data seeding
+│   │   └── database.py       # DB engine config
+│   └── tests/
+│       ├── conftest.py        # Test fixtures
+│       ├── test_main.py       # API endpoint tests (23)
+│       ├── test_budget_forecast.py  # Budget tests (6)
+│       └── test_use_cases.py  # Use case tests (10)
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── TaskLogPage.tsx
+│   │   │   ├── QualityPage.tsx
+│   │   │   ├── BudgetPage.tsx
+│   │   │   └── EmployeePage.tsx
+│   │   ├── App.tsx
+│   │   ├── api.ts
+│   │   ├── mockData.ts
+│   │   ├── types.ts
+│   │   └── index.css         # Tailwind v4 theme
+│   └── vite.config.ts
+└── .github/workflows/deploy.yml
+```
 
-- 프론트엔드는 기본적으로 `http://localhost:8000`을 API 베이스 URL로 사용합니다.
-- `VITE_API_BASE` 환경 변수를 설정하면 다른 백엔드 주소로 연결할 수 있습니다.
+## 🏢 데이터 구조
 
-## Documentation
+**영업 조직**: SW영업본부 → 10개 지역팀 (서울, 경기, 인천, 대전, 대구, 부산, 광주, 강원, 제주, 해외)
 
-- [Project Plan](docs/project_plan.md) — 전체 개요, 목표, 데이터 모델, 워크플로우, 품질 전략 등
+**영업 도메인**: 고객 영업 / 기술 지원 / 마케팅·홍보 / 파트너 관리 / 내부 행정
 
-## Repository Structure
+**업무 유형**: BAU / MEETING / PROPOSAL / DEMO / TRAINING / ADMIN / TRAVEL / SUPPORT
 
-- `backend/` — FastAPI backend service
-- `frontend/` — React + Vite frontend application
-- `docker-compose.yml` — local development orchestrator
-- `docs/` — project planning and documentation
-- `frontend/video/` — demo recording files
-- `README.md` — summary and quick start guide
+**사용 시스템**: Salesforce CRM, SAP ERP, MIDAS Portal, midas Civil/Gen/GTS NX/FEA, MS Teams 등
+
+## 📋 라이선스
+
+MIT License
