@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SW Sales ERP - Industrial Demo</title>
+    <!-- CDN: Tailwind CSS v4 -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <!-- CDN: React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- CDN: Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- CDN: Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide-react@latest"></script>
+    
+    <style type="text/tailwindcss">
+        @import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --color-base: #0C0C0C;
+            --color-surface: #141414;
+            --color-border: #262626;
+            --color-amber-500: #F59E0B;
+            --color-zinc-200: #E4E4E7;
+            --color-zinc-400: #A1A1AA;
+            --color-zinc-500: #71717A;
+            --color-zinc-800: #27272A;
+            --font-display: "Satoshi", sans-serif;
+            --font-sans: "DM Sans", sans-serif;
+            --font-mono: "JetBrains Mono", monospace;
+        }
+
+        body {
+            background-color: var(--color-base);
+            color: var(--color-zinc-200);
+            font-family: var(--font-sans);
+            position: relative;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 9999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .glass-card {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: var(--color-amber-500);
+            color: #0C0C0C;
+            border-radius: 8px;
+            font-weight: 700;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .data-grid {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+        .data-grid th {
+            text-align: left;
+            padding: 12px 16px;
+            background: #111;
+            color: var(--color-zinc-500);
+            border-bottom: 1px solid var(--color-border);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .data-grid td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .pulse-amber { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { 
+            Terminal, Sparkles, History, Target, CheckCircle2, 
+            AlertCircle, Hash, ChevronRight, Plus, Database, 
+            LineChart, ArrowRight 
+        } = lucideReact;
+
+        // ── Components: Portal Card ─────────────────────────────────────
+        const PortalCard = ({ onClick, title, desc, icon: Icon, action }) => (
+            <button onClick={onClick} className="group relative flex flex-col items-start p-8 glass-card border-zinc-800 hover:border-amber-500/30 transition-all duration-300 text-left w-full h-full">
+                <div className="w-12 h-12 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6 text-amber-500 group-hover:scale-110 transition-transform">
+                    <Icon size={24} />
+                </div>
+                <div className="space-y-3 flex-1">
+                    <h3 className="text-2xl font-bold font-[Satoshi] text-zinc-100 group-hover:text-amber-400 transition-colors">{title}</h3>
+                    <p className="text-zinc-500 text-sm leading-relaxed">{desc}</p>
+                </div>
+                <div className="mt-8 flex items-center gap-4 w-full">
+                    <div className="h-[1px] flex-1 bg-zinc-800 group-hover:bg-amber-900/30" />
+                    <div className="flex items-center gap-2 text-zinc-500 group-hover:text-amber-500 text-[11px] font-mono uppercase tracking-wider">
+                        {action} <ArrowRight size={14} />
+                    </div>
+                </div>
+            </button>
+        );
+
+        // ── Page: Landing ───────────────────────────────────────────────
+        const LandingPage = ({ onEnter }) => (
+            <div className="min-h-screen flex flex-col items-center justify-center px-6 py-20">
+                <div className="max-w-4xl text-center mb-16 space-y-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 text-[11px] font-mono text-zinc-500 uppercase tracking-widest backdrop-blur-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 pulse-amber shadow-[0_0_8px_#F59E0B]" />
+                        System Operational // v2.4.0
+                    </div>
+                    <h1 className="text-6xl md:text-8xl font-black font-[Satoshi] text-zinc-100 tracking-tight leading-[1.1]">
+                        Workforce <span className="text-amber-500">Intelligence</span>
+                    </h1>
+                    <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+                        MIDAS SW Sales 역량 가시화 및 업무 효율화를 위한 차세대 지능형 ERP. 전문가를 위한 AX 에이전트 기능을 직접 경험해 보세요.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl w-full">
+                    <PortalCard 
+                        title="SW 영업" 
+                        desc="업무 로그 기록, Taxonomy 기반 직무 분류 및 AX 지능형 조언 도구. 영업 활동 데이터를 실시간 분석합니다."
+                        icon={Database}
+                        action="Initialize Portal"
+                        onClick={() => onEnter('erp')}
+                    />
+                    <PortalCard 
+                        title="리소스 분석 대시보드" 
+                        desc="조직 및 개별 역량 데이터 시각화, RPA 기반 리포팅 서비스. 실시간 지표를 통해 조직의 성장을 확인합니다."
+                        icon={LineChart}
+                        action="Analyze Insights"
+                        onClick={() => onEnter('dash')}
+                    />
+                </div>
+            </div>
+        );
+
+        // ── Page: Dashboard (Resource Analysis) ─────────────────────────
+        const DashboardPage = ({ onBack }) => {
+            const kpis = [
+                { label: "총 투입 리소스", val: "1,248h", delta: "+12%", icon: Database },
+                { label: "영업 효율성 지수", val: "94.2", delta: "+5.1", icon: Target },
+                { label: "예산 대비 집행률", val: "72.4%", delta: "-2.3%", icon: LineChart },
+            ];
+
+            return (
+                <div className="min-h-screen flex flex-col overflow-hidden">
+                    <header className="px-8 py-6 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50 backdrop-blur-md">
+                        <div className="flex items-center gap-4 cursor-pointer" onClick={onBack}>
+                            <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-amber-500/30 flex items-center justify-center text-amber-500">
+                                <LineChart size={20} />
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-bold font-[Satoshi] text-zinc-100">Resource Analysis Dashboard</h1>
+                                <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Global Ops // Workforce Metrics</p>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="flex-1 p-8 lg:p-10 overflow-auto">
+                        <div className="max-w-[1400px] mx-auto space-y-10">
+                            {/* KPI Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {kpis.map((k, i) => (
+                                    <div key={i} className="glass-card p-6 flex items-center justify-between group">
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">{k.label}</span>
+                                            <div className="text-2xl font-black text-zinc-100 flex items-baseline gap-2">
+                                                {k.val}
+                                                <span className={`text-[10px] font-mono font-bold ${k.delta.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>{k.delta}</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-600 group-hover:text-amber-500 transition-colors">
+                                            <k.icon size={18} />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Charts Row */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <div className="glass-card p-8 space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="font-bold flex items-center gap-2"><Sparkles size={16} className="text-amber-500" /> 월별 업무 로드 추이</h3>
+                                        <span className="text-[10px] font-mono text-zinc-600 uppercase">Interactive SVG</span>
+                                    </div>
+                                    <div className="h-64 w-full bg-zinc-950/50 rounded-lg border border-zinc-900 border-dashed flex items-end p-4 gap-2">
+                                        {/* Mock SVG Bar Chart */}
+                                        {[40, 65, 45, 90, 75, 55, 85, 60, 40, 70, 95, 60].map((h, i) => (
+                                            <div key={i} className="flex-1 bg-amber-500/10 border-t border-x border-amber-500/20 group relative" style={{ height: `${h}%` }}>
+                                                <div className="absolute inset-0 bg-amber-500 opacity-0 group-hover:opacity-40 transition-opacity" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="glass-card p-8 space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="font-bold flex items-center gap-2"><Target size={16} className="text-amber-500" /> 도메인별 리소스 분포</h3>
+                                        <span className="text-[10px] font-mono text-zinc-600 uppercase">Industrial Radial</span>
+                                    </div>
+                                    <div className="h-64 flex items-center justify-center relative">
+                                        {/* Mock SVG Donut Chart */}
+                                        <svg className="w-48 h-48 -rotate-90">
+                                            <circle cx="96" cy="96" r="80" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-zinc-900" />
+                                            <circle cx="96" cy="96" r="80" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray="502" strokeDashoffset="140" className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.3)]" />
+                                            <circle cx="96" cy="96" r="80" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray="502" strokeDashoffset="400" className="text-zinc-700" />
+                                        </svg>
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                            <span className="text-[10px] font-mono text-zinc-600 uppercase">Civil_NX</span>
+                                            <span className="text-2xl font-black text-zinc-100">72.4%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Resource Table */}
+                            <div className="glass-card">
+                                <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
+                                    <h3 className="text-sm font-bold flex items-center gap-2"><Database size={16} className="text-zinc-500" /> 조직별 투입 현황</h3>
+                                    <div className="flex gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-zinc-800" />
+                                        <div className="w-2 h-2 rounded-full bg-zinc-800" />
+                                    </div>
+                                </div>
+                                <table className="data-grid">
+                                    <thead>
+                                        <tr>
+                                            <th>Region / Org</th>
+                                            <th>Lead Count</th>
+                                            <th>Resource (h)</th>
+                                            <th>Budget Allocation</th>
+                                            <th>Efficiency</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {[
+                                            { r: 'Seoul Branch', l: '42', t: '4,820', b: '₩ 142M', e: '98.2%' },
+                                            { r: 'Busan Ops', l: '28', t: '2,140', b: '₩ 84M', e: '92.1%' },
+                                            { r: 'Global Sales', l: '12', t: '1,560', b: '₩ 214M', e: '88.5%' },
+                                            { r: 'Tech Support', l: '18', t: '3,210', b: '₩ 62M', e: '94.0%' },
+                                        ].map((r, i) => (
+                                            <tr key={i} className="hover:bg-amber-500/[0.02] transition-colors">
+                                                <td className="text-zinc-100 font-bold">{r.r}</td>
+                                                <td className="text-zinc-500">{r.l}</td>
+                                                <td className="text-amber-500/80 font-mono">{r.t}</td>
+                                                <td className="text-zinc-400">{r.b}</td>
+                                                <td>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-24 h-1 bg-zinc-900 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-amber-500" style={{ width: r.e }} />
+                                                        </div>
+                                                        <span className="text-[10px] font-mono text-zinc-500">{r.e}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // ── Main App Root ───────────────────────────────────────────────
+        function App() {
+            const [view, setView] = useState('landing');
+            if (view === 'landing') return <LandingPage onEnter={setView} />;
+            if (view === 'erp') return <ERPPage onBack={() => setView('landing')} />;
+            if (view === 'dash') return <DashboardPage onBack={() => setView('landing')} />;
+            return <div className="p-20 text-center">Interface Error</div>;
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
