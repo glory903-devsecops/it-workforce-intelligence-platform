@@ -101,3 +101,15 @@ export interface BudgetForecastRead {
   notes?: string;
   created_at: string;
 }
+
+export interface AXResult {
+  stream_id?: string;
+  domain_id?: string;
+  capability_id?: string;
+  task_template_id?: string;
+  confidence: number;
+  candidate_reasons: string[];
+  extracted_entities: string[];
+  suggested_work_type: string;
+}
+

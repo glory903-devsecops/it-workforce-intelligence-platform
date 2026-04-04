@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Users, UserCheck, UserPlus, UserX, Search, Filter } from "lucide-react";
 import { fetchEmployees } from "../api";
 
 interface Employee {
@@ -16,6 +17,18 @@ export default function EmployeePage() {
   const [search, setSearch] = useState("");
   const [filterRegion, setFilterRegion] = useState("전체");
   const [filterType, setFilterType] = useState("전체");
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
+
+  const handleRegionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilterRegion(e.target.value);
+  };
+
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilterType(e.target.value);
+  };
 
   useEffect(() => {
     fetchEmployees().then(setEmployees);
@@ -37,102 +50,129 @@ export default function EmployeePage() {
     외주: employees.filter((e) => e.workforce_type === "외주").length,
   };
 
-  const typeColor = (type: string) => {
+  const getBadgeClass = (type: string) => {
     switch (type) {
-      case "정규직": return { bg: "rgba(34,197,94,0.15)", color: "#22C55E" };
-      case "계약직": return { bg: "rgba(234,179,8,0.15)", color: "#EAB308" };
-      case "외주": return { bg: "rgba(239,68,68,0.15)", color: "#EF4444" };
-      default: return { bg: "rgba(148,163,184,0.15)", color: "#94A3B8" };
+      case "정규직": return "badge-success";
+      case "계약직": return "badge-amber";
+      case "외주": return "badge-error";
+      default: return "badge-zinc";
     }
   };
 
   return (
-    <div className="fade-in space-y-6">
+    <div className="space-y-8 py-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="glass-card p-5 hover-lift">
-          <div className="text-xl mb-2">👥</div>
-          <div className="text-2xl font-bold" style={{ color: "#F5A623" }}>{employees.length}명</div>
-          <div className="text-xs mt-1" style={{ color: "var(--color-midas-text-secondary)" }}>전체 영업 인력</div>
+        <div className="glass-card p-5 group">
+          <div className="flex items-center justify-between mb-3 text-zinc-500">
+            <Users size={18} />
+            <span className="text-[10px] font-mono tracking-widest uppercase">Total</span>
+          </div>
+          <div className="text-2xl font-bold font-display text-amber-500">{employees.length}명</div>
+          <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">영업 전사 인력</div>
         </div>
-        <div className="glass-card p-5 hover-lift">
-          <div className="text-xl mb-2">🟢</div>
-          <div className="text-2xl font-bold" style={{ color: "#22C55E" }}>{typeCounts.정규직}명</div>
-          <div className="text-xs mt-1" style={{ color: "var(--color-midas-text-secondary)" }}>정규직</div>
+        <div className="glass-card p-5">
+          <div className="flex items-center justify-between mb-3 text-zinc-500">
+            <UserCheck size={18} className="text-success" />
+            <span className="text-[10px] font-mono tracking-widest uppercase">Full-Time</span>
+          </div>
+          <div className="text-2xl font-bold font-display text-zinc-100">{typeCounts.정규직}명</div>
+          <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">정규 직무자</div>
         </div>
-        <div className="glass-card p-5 hover-lift">
-          <div className="text-xl mb-2">🟡</div>
-          <div className="text-2xl font-bold" style={{ color: "#EAB308" }}>{typeCounts.계약직}명</div>
-          <div className="text-xs mt-1" style={{ color: "var(--color-midas-text-secondary)" }}>계약직</div>
+        <div className="glass-card p-5">
+          <div className="flex items-center justify-between mb-3 text-zinc-500">
+            <UserPlus size={18} className="text-warning" />
+            <span className="text-[10px] font-mono tracking-widest uppercase">Contract</span>
+          </div>
+          <div className="text-2xl font-bold font-display text-zinc-100">{typeCounts.계약직}명</div>
+          <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">계약직/파견직</div>
         </div>
-        <div className="glass-card p-5 hover-lift">
-          <div className="text-xl mb-2">🔴</div>
-          <div className="text-2xl font-bold" style={{ color: "#EF4444" }}>{typeCounts.외주}명</div>
-          <div className="text-xs mt-1" style={{ color: "var(--color-midas-text-secondary)" }}>외주</div>
+        <div className="glass-card p-5">
+          <div className="flex items-center justify-between mb-3 text-zinc-500">
+            <UserX size={18} className="text-error" />
+            <span className="text-[10px] font-mono tracking-widest uppercase">Outsourced</span>
+          </div>
+          <div className="text-2xl font-bold font-display text-zinc-100">{typeCounts.외주}명</div>
+          <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">외주 협력 인력</div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="glass-card p-4">
-        <div className="flex flex-wrap items-center gap-4">
+      {/* Filter Toolbar */}
+      <div className="glass-card p-4 flex flex-wrap items-center gap-4 border-l-2 border-l-amber-500/50 bg-zinc-900/10">
+        <div className="relative flex-1 min-w-[240px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" size={14} />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="이름 또는 사번으로 검색..."
-            className="form-input max-w-xs"
+            className="form-input w-full pl-9"
           />
-          <select value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)} className="form-input max-w-[150px]">
-            {regions.map((r) => <option key={r}>{r}</option>)}
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter size={14} className="text-zinc-500" />
+          <select value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)} className="form-input min-w-[140px]">
+            {regions.map((r) => <option key={r} value={r}>{r}</option>)}
           </select>
-          <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="form-input max-w-[150px]">
-            {types.map((t) => <option key={t}>{t}</option>)}
+          <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="form-input min-w-[140px]">
+            {types.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
-          <span className="text-sm" style={{ color: "var(--color-midas-text-secondary)" }}>
-            {filtered.length}명 표시
-          </span>
+        </div>
+        <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-tighter">
+          Search Result: <span className="text-amber-500">{filtered.length} units</span> found
         </div>
       </div>
 
       {/* Employees Table */}
-      <div className="glass-card p-6">
-        <h3 className="text-lg font-bold mb-4" style={{ color: "var(--color-midas-gold)" }}>
-          👥 영업 담당자 목록
-        </h3>
-        <div className="overflow-x-auto" style={{ maxHeight: "600px", overflowY: "auto" }}>
-          <table className="data-table">
-            <thead style={{ position: "sticky", top: 0, zIndex: 10 }}>
+      <div className="glass-card overflow-hidden">
+        <div className="px-8 py-5 border-b border-zinc-800 bg-zinc-900/20 flex items-center justify-between">
+          <h3 className="font-display font-bold text-zinc-200 flex items-center gap-2 tracking-tight">
+            <Users size={18} className="text-amber-500" /> 
+            영업 담당자 데이터베이스
+          </h3>
+          <span className="text-[10px] font-mono text-zinc-600 uppercase">Archive: STAFF_MASTER_V2</span>
+        </div>
+        <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+          <table className="data-grid">
+            <thead className="sticky top-0 z-10">
               <tr>
-                <th>사번</th>
-                <th>이름</th>
-                <th>직급</th>
-                <th>인력유형</th>
-                <th>지역</th>
+                <th className="pl-8">Employee ID</th>
+                <th>Name / Identity</th>
+                <th>Position</th>
+                <th>Staffing Type</th>
+                <th className="pr-8">Region Pool</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.slice(0, 100).map((emp) => {
-                const tc = typeColor(emp.workforce_type);
-                return (
-                  <tr key={emp.id}>
-                    <td className="font-mono text-sm">{emp.employee_code || "-"}</td>
-                    <td className="font-medium">{emp.name}</td>
-                    <td>{emp.position || "-"}</td>
-                    <td>
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ background: tc.bg, color: tc.color }}>
-                        {emp.workforce_type}
-                      </span>
-                    </td>
-                    <td>{emp.region || "-"}</td>
-                  </tr>
-                );
-              })}
+              {filtered.slice(0, 100).map((emp) => (
+                <tr key={emp.id} className="hover:bg-amber-500/[0.02] transition-colors">
+                  <td className="pl-8 font-mono text-zinc-500 text-[11px] font-bold">
+                    {emp.employee_code || "N/A"}
+                  </td>
+                  <td className="font-bold text-zinc-100">{emp.name}</td>
+                  <td className="text-zinc-400 font-mono text-[11px]">{emp.position || "Staff"}</td>
+                  <td>
+                    <span className={`badge ${getBadgeClass(emp.workforce_type)}`}>
+                      {emp.workforce_type}
+                    </span>
+                  </td>
+                  <td className="pr-8 text-zinc-500 font-medium">{emp.region || "Global"}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
+          {filtered.length === 0 && (
+            <div className="py-20 text-center space-y-3">
+              <UserX className="mx-auto text-zinc-800" size={32} />
+              <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">No matching personnel records found</p>
+            </div>
+          )}
           {filtered.length > 100 && (
-            <p className="text-sm text-center mt-4" style={{ color: "var(--color-midas-text-secondary)" }}>
-              총 {filtered.length}명 중 상위 100명 표시
-            </p>
+            <div className="py-4 border-t border-zinc-800 bg-zinc-950/50 text-center">
+              <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
+                Displaying first 100 records out of {filtered.length} total units
+              </p>
+            </div>
           )}
         </div>
       </div>

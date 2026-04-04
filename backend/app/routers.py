@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import models, schemas
 from .database import get_async_session
+from .ax_sales_logic import predict_sales_taxonomy, AXResult
 from .repository import (
     get_master_items, get_task_logs, get_data_quality_issues, get_budget_forecasts,
     count_employees, count_task_logs, sum_task_hours, count_quality_issues,

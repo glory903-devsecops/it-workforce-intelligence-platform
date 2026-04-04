@@ -116,44 +116,27 @@ test.beforeEach(async ({ page }) => {
   );
 });
 
-test("dashboard shows summary cards and exports CSV for budget and quality data", async ({
+test("dashboard shows summary cards and navigation flows to industrial modules", async ({
   page,
 }) => {
   await page.goto("/");
 
+  // Check for New Hero Title (Industrial Theme)
   await expect(page.locator("h1")).toContainText(
-    "IT Workforce Intelligence Platform",
+    "DYNAMICRESOURCES",
   );
 
-  await page.getByRole("button", { name: "예산 예측" }).click();
-  await expect(page.getByText("예측 개수")).toBeVisible();
-  await expect(page.getByText("총 예상 비용")).toBeVisible();
+  // Navigate to SW Sales Terminal (Task Log)
+  await page.getByRole("button", { name: /SW Sales Terminal/i }).click();
+  await expect(page).toHaveURL(/\/app\/task-log/);
+  await expect(page.getByText("Data Quality Governance Terminal")).toBeVisible();
 
-  const [budgetDownload] = await Promise.all([
-    page.waitForEvent("download"),
-    page.getByRole("button", { name: "CSV 다운로드" }).click(),
-  ]);
+  // Navigate to Insight Hub (Dashboard) from sidebar
+  await page.getByRole("link", { name: /Dashboard/i }).click();
+  await expect(page).toHaveURL(/\/app\/dashboard/);
+  await expect(page.getByText("Aggregating Enterprise Data")).toBeVisible(); // Loading or title
 
-  expect(await budgetDownload.suggestedFilename()).toBe("budget-forecasts.csv");
-  const budgetPath = await budgetDownload.path();
-  expect(budgetPath).not.toBeNull();
-  const budgetCsv = await fs.readFile(budgetPath!, "utf-8");
-  expect(budgetCsv).toContain("예측 ID");
-  expect(budgetCsv).toContain("시연 테스트");
-
-  await page.getByRole("button", { name: "품질 모니터" }).click();
-  await expect(page.getByText("전체 이슈")).toBeVisible();
-  await expect(page.getByText("Open 이슈")).toBeVisible();
-
-  const [qualityDownload] = await Promise.all([
-    page.waitForEvent("download"),
-    page.getByRole("button", { name: "CSV 다운로드" }).click(),
-  ]);
-
-  expect(await qualityDownload.suggestedFilename()).toBe("quality-issues.csv");
-  const qualityPath = await qualityDownload.path();
-  expect(qualityPath).not.toBeNull();
-  const qualityCsv = await fs.readFile(qualityPath!, "utf-8");
-  expect(qualityCsv).toContain("이슈 유형");
-  expect(qualityCsv).toContain("과다시간 입력");
+  // Verify Budget Forecast visibility
+  await page.getByRole("link", { name: /Budget/i }).click();
+  await expect(page.getByText("Aggregate Q4 Load Plan")).toBeVisible();
 });

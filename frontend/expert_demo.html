@@ -101,57 +101,142 @@
         const { 
             Terminal, Sparkles, History, Target, CheckCircle2, 
             AlertCircle, Hash, ChevronRight, Plus, Database, 
-            LineChart, ArrowRight 
-        } = lucideReact;
+            LineChart, ArrowRight, Zap, Shield, Cpu, Activity,
+            ClipboardList, Clock, MapPin, BarChart3, Search, Filter
+        } = LucideReact;
 
-        // ── Components: Portal Card ─────────────────────────────────────
-        const PortalCard = ({ onClick, title, desc, icon: Icon, action }) => (
-            <button onClick={onClick} className="group relative flex flex-col items-start p-8 glass-card border-zinc-800 hover:border-amber-500/30 transition-all duration-300 text-left w-full h-full">
-                <div className="w-12 h-12 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6 text-amber-500 group-hover:scale-110 transition-transform">
-                    <Icon size={24} />
+        // ── Component: ERPPage (SW Sales Terminal) ──────────────────────
+        const ERPPage = ({ onBack }) => {
+            const [logs, setLogs] = useState([
+                { id: '1024', title: 'Civil_NX License Audit', type: 'Sales_Support', time: '09:00', status: 'Verified' },
+                { id: '1025', title: 'Enterprise Hub Integration', type: 'Consulting', time: '10:30', status: 'Draft' },
+                { id: '1026', title: 'Resource Load Assessment', type: 'Admin', time: '13:15', status: 'Alert' },
+            ]);
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    <header className="px-8 py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50">
+                        <div className="flex items-center gap-4 cursor-pointer" onClick={onBack}>
+                            <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+                                <Cpu size={18} />
+                            </div>
+                            <div>
+                                <h1 className="text-lg font-black font-[Satoshi] tracking-tight text-zinc-100 italic uppercase">SW Sales Terminal</h1>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                    <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest font-bold">Node Active // Protocol V4.2</p>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="flex-1 p-8 overflow-auto">
+                        <div className="max-w-6xl mx-auto space-y-10">
+                            {/* Dashboard Stats */}
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                {[
+                                    { label: 'Session Time', val: '04:12:05', icon: Clock },
+                                    { label: 'Data Quality', val: '98.2%', icon: Shield },
+                                    { label: 'AX Confidence', val: 'Low', icon: Zap },
+                                    { label: 'Active Region', val: 'Seoul', icon: MapPin },
+                                ].map((s, i) => (
+                                    <div key={i} className="glass-card p-4 flex items-center justify-between group">
+                                        <div className="space-y-1">
+                                            <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest font-bold">{s.label}</span>
+                                            <div className="text-lg font-black font-[Satoshi] text-zinc-200 group-hover:text-amber-500 transition-colors uppercase italic">{s.val}</div>
+                                        </div>
+                                        <s.icon size={16} className="text-zinc-700 group-hover:text-amber-500 transition-colors" />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Main Content Area */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                <div className="lg:col-span-8 space-y-6">
+                                    <div className="glass-card overflow-hidden">
+                                        <div className="px-6 py-4 border-b border-zinc-900 bg-zinc-900/30 flex items-center justify-between">
+                                            <h3 className="text-[10px] font-mono text-zinc-400 uppercase tracking-[0.2em] font-black italic">Historical Audit Stream</h3>
+                                            <div className="flex gap-2">
+                                                <button className="p-1.5 rounded bg-zinc-800 text-zinc-500 hover:text-amber-500 transition-colors"><Search size={14}/></button>
+                                                <button className="p-1.5 rounded bg-zinc-800 text-zinc-500 hover:text-amber-500 transition-colors"><Filter size={14}/></button>
+                                            </div>
+                                        </div>
+                                        <table className="data-grid">
+                                            <thead>
+                                                <tr>
+                                                    <th className="pl-6">Log ID</th>
+                                                    <th>Activity Description</th>
+                                                    <th>Taxonomy</th>
+                                                    <th className="pr-6 text-right">Auth</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {logs.map((log, i) => (
+                                                    <tr key={i} className="hover:bg-amber-500/[0.03] transition-colors group">
+                                                        <td className="pl-6 font-mono text-[11px] text-zinc-500">#{log.id}</td>
+                                                        <td className="font-bold text-zinc-200 group-hover:text-amber-500 transition-colors uppercase italic">{log.title}</td>
+                                                        <td className="text-[10px] font-mono text-zinc-500 font-bold uppercase">{log.type}</td>
+                                                        <td className="pr-6 text-right">
+                                                            <span className={`inline-block w-2 h-2 rounded-full ${log.status === 'Verified' ? 'bg-green-500 shadow-[0_0_8px_#22C55E]' : log.status === 'Alert' ? 'bg-red-500 shadow-[0_0_8px_#EF4444]' : 'bg-zinc-700'}`} />
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div className="lg:col-span-4">
+                                    <div className="glass-card p-6 space-y-6 border-amber-500/10">
+                                        <div className="flex items-center gap-3 border-b border-zinc-900 pb-4">
+                                            <Zap size={18} className="text-amber-500" />
+                                            <h3 className="text-xs font-black font-[Satoshi] text-zinc-200 uppercase italic tracking-widest">AX Intelligence Log</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 text-[11px] font-mono leading-relaxed text-zinc-400">
+                                                <span className="text-amber-500 font-bold tracking-tighter">SIGNAL DETECTED:</span> Activity pattern suggests high focus on pre-sales support for the current sprint. Recommend allocating additional 4 nodes to Civil_NX validation tasks.
+                                            </div>
+                                            <button className="w-full btn-primary text-xs uppercase italic tracking-widest hover:scale-[1.02] active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.15)]">Initialize AX Mapping</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
                 </div>
-                <div className="space-y-3 flex-1">
-                    <h3 className="text-2xl font-bold font-[Satoshi] text-zinc-100 group-hover:text-amber-400 transition-colors">{title}</h3>
-                    <p className="text-zinc-500 text-sm leading-relaxed">{desc}</p>
-                </div>
-                <div className="mt-8 flex items-center gap-4 w-full">
-                    <div className="h-[1px] flex-1 bg-zinc-800 group-hover:bg-amber-900/30" />
-                    <div className="flex items-center gap-2 text-zinc-500 group-hover:text-amber-500 text-[11px] font-mono uppercase tracking-wider">
-                        {action} <ArrowRight size={14} />
-                    </div>
-                </div>
-            </button>
-        );
+            );
+        };
 
         // ── Page: Landing ───────────────────────────────────────────────
         const LandingPage = ({ onEnter }) => (
             <div className="min-h-screen flex flex-col items-center justify-center px-6 py-20">
-                <div className="max-w-4xl text-center mb-16 space-y-6">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 text-[11px] font-mono text-zinc-500 uppercase tracking-widest backdrop-blur-sm">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 pulse-amber shadow-[0_0_8px_#F59E0B]" />
-                        System Operational // v2.4.0
+                <div className="max-w-4xl text-center mb-16 space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-1000">
+                    <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 text-[10px] font-mono text-zinc-500 uppercase tracking-[0.3em] backdrop-blur-sm shadow-2xl">
+                        <Zap size={10} className="text-amber-500" />
+                        Next-Gen Workforce Protocol // V4.2
                     </div>
-                    <h1 className="text-6xl md:text-8xl font-black font-[Satoshi] text-zinc-100 tracking-tight leading-[1.1]">
-                        Workforce <span className="text-amber-500">Intelligence</span>
+                    <h1 className="text-6xl md:text-8xl font-black font-[Satoshi] text-zinc-100 tracking-tight leading-[0.95] italic uppercase">
+                        Dynamic<br />
+                        <span className="text-amber-500 not-italic">Resources</span>
                     </h1>
-                    <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-                        MIDAS SW Sales 역량 가시화 및 업무 효율화를 위한 차세대 지능형 ERP. 전문가를 위한 AX 에이전트 기능을 직접 경험해 보세요.
+                    <p className="text-lg text-zinc-500 max-w-2xl mx-auto leading-relaxed">
+                        Streamline the SW sales ecosystem through AX-driven taxonomy mapping and real-time resource orchestration.
                     </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl w-full">
                     <PortalCard 
-                        title="SW 영업" 
-                        desc="업무 로그 기록, Taxonomy 기반 직무 분류 및 AX 지능형 조언 도구. 영업 활동 데이터를 실시간 분석합니다."
-                        icon={Database}
-                        action="Initialize Portal"
+                        title="SW Sales Terminal" 
+                        desc="Access the intelligence-driven ERP portal. Log activities, execute AX taxonomy mapping, and receive strategic guidance."
+                        icon={Cpu}
+                        action="Initialize Session"
                         onClick={() => onEnter('erp')}
                     />
                     <PortalCard 
-                        title="리소스 분석 대시보드" 
-                        desc="조직 및 개별 역량 데이터 시각화, RPA 기반 리포팅 서비스. 실시간 지표를 통해 조직의 성장을 확인합니다."
+                        title="Insight Hub" 
+                        desc="Consolidated analytics for enterprise-wide resources. Monitor workforce distribution, performance, and financial forecasts."
                         icon={LineChart}
-                        action="Analyze Insights"
+                        action="Audit Enterprise"
                         onClick={() => onEnter('dash')}
                     />
                 </div>
@@ -161,9 +246,9 @@
         // ── Page: Dashboard (Resource Analysis) ─────────────────────────
         const DashboardPage = ({ onBack }) => {
             const kpis = [
-                { label: "총 투입 리소스", val: "1,248h", delta: "+12%", icon: Database },
-                { label: "영업 효율성 지수", val: "94.2", delta: "+5.1", icon: Target },
-                { label: "예산 대비 집행률", val: "72.4%", delta: "-2.3%", icon: LineChart },
+                { label: "Total Unit Capacity", val: "14,820h", delta: "+12.4%", icon: Cpu },
+                { label: "Regional Density", val: " Seoul", delta: "Primary", icon: MapPin },
+                { label: "Financial Forecast", val: "₩ 1.4B", delta: "Q4_EST", icon: LineChart },
             ];
 
             return (

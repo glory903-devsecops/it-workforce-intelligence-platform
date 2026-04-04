@@ -170,3 +170,9 @@ class DomainDistribution(BaseModel):
     domain: str
     total_hours: float
     percentage: float
+
+
+class AXInput(BaseModel):
+    work_title: str
+    work_detail: Optional[str] = None
+

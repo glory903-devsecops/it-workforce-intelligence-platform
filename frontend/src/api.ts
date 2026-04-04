@@ -46,6 +46,17 @@ export const createTaskLog = async (payload: TaskLogCreate) =>
 export const validateTaskLog = async (payload: TaskLogCreate) =>
   useMock ? [] : api.post("/task-logs/validate", payload).then((r) => r.data);
 
+export const predictSalesTaxonomy = async (work_title: string, work_detail?: string) =>
+  useMock
+    ? {
+        confidence: 0.9,
+        candidate_reasons: ["Mock: Sales activity detected"],
+        extracted_entities: ["Civil NX"],
+        suggested_work_type: "SALES_SUPPORT",
+      }
+    : api.post("/ax/predict-sales", { work_title, work_detail }).then((r) => r.data);
+
+
 // ── Budget Forecasts ────────────────────────────────────────────────────
 export const fetchBudgetForecasts = async () =>
   useMock ? mock.mockBudgetForecasts : api.get("/budget-forecasts").then((r) => r.data);
