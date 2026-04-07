@@ -1,16 +1,716 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="MIDAS SW 영업 300명 인력 리소스 분석 및 2026 예산 예측 플랫폼" />
-    <title>MIDAS SW Sales Intelligence Platform</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  </head>
-  <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Workforce Intelligence - Industrial Terminal</title>
+    <!-- CDN: Tailwind CSS v4 -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <!-- CDN: React & ReactDOM (UMD) -->
+    <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+    <script>
+        // Lucide-React UMD expects lower-case 'react' and 'react-dom' on window
+        window.react = window.React;
+        window['react-dom'] = window.ReactDOM;
+    </script>
+    <!-- CDN: Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- CDN: Lucide Icons (UMD) -->
+    <script src="https://unpkg.com/lucide@0.479.0/dist/umd/lucide.min.js"></script>
+    <script src="https://unpkg.com/lucide-react@0.479.0/dist/umd/lucide-react.min.js"></script>
+    
+    <style type="text/tailwindcss">
+        @import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --color-base: #0C0C0C;
+            --color-surface: #141414;
+            --color-border: #262626;
+            --color-amber-500: #F59E0B;
+            --color-zinc-200: #E4E4E7;
+            --color-zinc-400: #A1A1AA;
+            --color-zinc-500: #71717A;
+            --color-zinc-800: #27272A;
+            --font-display: "Satoshi", sans-serif;
+            --font-sans: "DM Sans", sans-serif;
+            --font-mono: "JetBrains Mono", monospace;
+        }
+
+        body {
+            background-color: var(--color-base);
+            color: var(--color-zinc-200);
+            font-family: var(--font-sans);
+            position: relative;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 9999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .glass-card {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: var(--color-amber-500);
+            color: #0C0C0C;
+            border-radius: 8px;
+            font-weight: 700;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            text-transform: uppercase;
+            font-family: var(--font-display);
+            letter-spacing: 0.05em;
+        }
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .data-grid {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+        .data-grid th {
+            text-align: left;
+            padding: 12px 16px;
+            background: #111;
+            color: var(--color-zinc-500);
+            border-bottom: 1px solid var(--color-border);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .data-grid td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .input-industrial {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: var(--color-zinc-200);
+            font-family: var(--font-mono);
+            font-size: 13px;
+        }
+        .input-industrial:focus {
+            outline: none;
+            border-color: var(--color-amber-500);
+            box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.2);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+    </style>
+</head>
+<body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { 
+            Terminal, Sparkles, History, Target, CheckCircle2, 
+            AlertCircle, Hash, ChevronRight, Plus, Database, 
+            LineChart, ArrowRight, Zap, Shield, Cpu, Activity,
+            ClipboardList, Clock, MapPin, BarChart3, Search, Filter,
+            X, Save, Loader2, Users
+        } = window.LucideReact || {};
+
+        const API_BASE = "http://localhost:8000";
+
+        // --- Mock Data for Demo/GitHub Pages ---
+        const MOCK_DATA = {
+            summary: {
+                total_employees: 300,
+                total_task_logs: 156000,
+                total_hours: 362400.0,
+                total_regions: 10,
+                avg_hours_per_employee: 1208.0,
+                quality_issues_count: 24,
+                budget_forecast_total: 12546000000,
+            },
+            regions: [
+                { region: "서울", employee_count: 45, total_hours: 54360.0, total_cost: 1630800000 },
+                { region: "경기", employee_count: 42, total_hours: 50760.0, total_cost: 1522800000 },
+                { region: "부산", employee_count: 30, total_hours: 36240.0, total_cost: 1087200000 },
+                { region: "대구", employee_count: 28, total_hours: 33810.0, total_cost: 1014300000 },
+                { region: "인천", employee_count: 30, total_hours: 36240.0, total_cost: 1087200000 },
+                { region: "대전", employee_count: 28, total_hours: 33810.0, total_cost: 1014300000 },
+                { region: "광주", employee_count: 25, total_hours: 30200.0, total_cost: 906000000 },
+                { region: "강원", employee_count: 24, total_hours: 29000.0, total_cost: 870000000 },
+                { region: "제주", employee_count: 22, total_hours: 26580.0, total_cost: 797400000 },
+                { region: "해외", employee_count: 26, total_hours: 31400.0, total_cost: 942000000 },
+            ],
+            domains: [
+                { id: 1, name: "고객 영업", description: "고객사 방문, 제안, 계약 체결 등 직접 영업 활동" },
+                { id: 2, name: "기술 지원", description: "제품 기술 설명, 데모, 기술 문의 대응" },
+                { id: 3, name: "마케팅/홍보", description: "세미나, 전시회, 콘텐츠 제작 등 마케팅 활동" },
+                { id: 4, name: "파트너 관리", description: "리셀러, 총판, 해외 파트너 관리" },
+                { id: 5, name: "내부 행정", description: "보고서, 회의, 교육, 평가 등 내부 업무" },
+            ],
+            activities: [
+                { id: 1, capability_id: 1, name: "콜드콜/이메일 발송" },
+                { id: 2, capability_id: 1, name: "고객 방문 미팅" },
+                { id: 3, capability_id: 1, name: "니즈 분석 보고서 작성" },
+                { id: 5, capability_id: 5, name: "midas Civil 시연" },
+                { id: 12, capability_id: 7, name: "신규 사용자 교육" },
+            ],
+            employees: Array.from({ length: 300 }, (_, i) => {
+                const lastNames = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임"];
+                const firstNames = ["민준", "서준", "도윤", "예준", "시우", "하준", "지호", "주원", "지후", "준서"];
+                const regions = ["서울", "경기", "인천", "대전", "대구", "부산", "광주", "강원", "제주", "해외"];
+                return {
+                    id: i + 1,
+                    name: `${lastNames[i % 10]}${firstNames[(i + 3) % 10]}`,
+                    region: regions[i % 10],
+                    employee_code: `MDS-2025${String(i + 1).padStart(4, "0")}`
+                };
+            }),
+            workTypes: [
+                { id: 1, name: "BAU" }, { id: 2, name: "MEETING" }, { id: 3, name: "PROPOSAL" }, { id: 4, name: "DEMO" }
+            ],
+            taskLogs: [
+              { id: 1024, employee: { name: '김민준', region: '서울' }, work_title: 'Midas Civil NX 기술 제안', domain: { name: '고객 영업' }, activity: { name: '제안서 작성' }, hours: 3.5, work_date: '2026-04-06' },
+              { id: 1025, employee: { name: '이서준', region: '경기' }, work_title: '고객사 현장 방문 미팅', domain: { name: '고객 영업' }, activity: { name: '고객 방문 미팅' }, hours: 4.0, work_date: '2026-04-06' },
+              { id: 1026, employee: { name: '박도윤', region: '부산' }, work_title: '신규 사용자 교육 세션', domain: { name: '기술 지원' }, activity: { name: '신규 사용자 교육' }, hours: 2.0, work_date: '2026-04-05' },
+              { id: 1027, employee: { name: '최예준', region: '해외' }, work_title: '글로벌 파트너쉽 전략 회의', domain: { name: '파트너 관리' }, activity: { name: '리셀러 관리' }, hours: 5.5, work_date: '2026-04-05' },
+            ]
+        };
+
+        // --- API Helpers with Enhanced Fallback ---
+        const api = {
+            get: async (url) => {
+                try {
+                    const res = await fetch(`${API_BASE}${url}`);
+                    if (!res.ok) throw new Error(`API Error: ${res.status}`);
+                    return await res.json();
+                } catch (e) {
+                    console.warn(`API Fetch failed for ${url}. Using MOCK_DATA fallback.`);
+                    if (url.includes('/employees')) return MOCK_DATA.employees;
+                    if (url.includes('/domains')) return MOCK_DATA.domains;
+                    if (url.includes('/activities')) return MOCK_DATA.activities;
+                    if (url.includes('/work-types')) return MOCK_DATA.workTypes;
+                    if (url.includes('/task-logs')) return MOCK_DATA.taskLogs;
+                    if (url.includes('/dashboard/summary')) return MOCK_DATA.summary;
+                    if (url.includes('/dashboard/by-region')) return MOCK_DATA.regions;
+                    throw e;
+                }
+            },
+            post: async (url, body) => {
+                try {
+                    const res = await fetch(`${API_BASE}${url}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (!res.ok) throw new Error(`API Error: ${res.status}`);
+                    return await res.json();
+                } catch (e) {
+                    console.warn(`API Post failed for ${url}. Simulating success in Demo Mode.`);
+                    return { ...body, id: Date.now(), status: 'MOCK_SUCCESS' };
+                }
+            }
+        };
+
+        // ── Component: WorkRecordModal ──────────────────────────────────
+        // This is the new high-efficiency entry form
+        const WorkRecordModal = ({ isOpen, onClose, onSuccess, metadata }) => {
+            const [loading, setLoading] = useState(false);
+            const [formData, setFormData] = useState({
+                employee_id: '',
+                work_title: '',
+                work_detail: '',
+                work_date: new Date().toISOString().split('T')[0],
+                hours: 1.0,
+                domain_id: '',
+                activity_id: '',
+                work_type_id: '',
+                system_id: '',
+                team_id: ''
+            });
+
+            if (!isOpen) return null;
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                try {
+                    await api.post('/task-logs', {
+                        ...formData,
+                        employee_id: parseInt(formData.employee_id),
+                        domain_id: parseInt(formData.domain_id),
+                        activity_id: parseInt(formData.activity_id),
+                        work_type_id: parseInt(formData.work_type_id),
+                        system_id: formData.system_id ? parseInt(formData.system_id) : null,
+                        team_id: formData.team_id ? parseInt(formData.team_id) : null,
+                        hours: parseFloat(formData.hours)
+                    });
+                    onSuccess();
+                    onClose();
+                } catch (err) {
+                    alert("Backend Error: " + err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-20 bg-black/80 backdrop-blur-sm animate-fade-in">
+                    <div className="glass-card w-full max-w-4xl max-h-full overflow-hidden flex flex-col border-amber-500/20 shadow-2xl">
+                        <div className="flex items-center justify-between px-8 py-6 border-b border-zinc-800 bg-zinc-900/50">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-amber-500/30 flex items-center justify-center text-amber-500">
+                                    <ClipboardList size={22} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black font-[Satoshi] italic uppercase text-zinc-100 tracking-tight">Log Technical Activity</h2>
+                                    <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Protocol V4 // Data Integrity Check Active</p>
+                                </div>
+                            </div>
+                            <button onClick={onClose} className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-500 hover:text-zinc-200 transition-all">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="p-8 overflow-y-auto space-y-8 custom-scrollbar">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block font-bold">Primary Resource</label>
+                                    <select 
+                                        required
+                                        value={formData.employee_id}
+                                        onChange={e => setFormData({...formData, employee_id: e.target.value})}
+                                        className="w-full input-industrial h-12"
+                                    >
+                                        <option value="">Select Employee...</option>
+                                        {metadata.employees.map(emp => (
+                                            <option key={emp.id} value={emp.id}>{emp.name} ({emp.region})</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block font-bold">Operational Date</label>
+                                    <input 
+                                        type="date"
+                                        required
+                                        value={formData.work_date}
+                                        onChange={e => setFormData({...formData, work_date: e.target.value})}
+                                        className="w-full input-industrial h-12"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block font-bold">Activity Description</label>
+                                <input 
+                                    placeholder="Enter concise title of the activity..."
+                                    required
+                                    value={formData.work_title}
+                                    onChange={e => setFormData({...formData, work_title: e.target.value})}
+                                    className="w-full input-industrial h-12 text-lg font-bold"
+                                />
+                                <textarea 
+                                    placeholder="Technical details, outcomes, or observations..."
+                                    value={formData.work_detail}
+                                    onChange={e => setFormData({...formData, work_detail: e.target.value})}
+                                    className="w-full input-industrial h-24 resize-none"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block font-bold">L1 Domain</label>
+                                    <select required value={formData.domain_id} onChange={e => setFormData({...formData, domain_id: e.target.value})} className="w-full input-industrial h-10">
+                                        <option value="">Select Domain...</option>
+                                        {metadata.domains.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block font-bold">L2 Activity</label>
+                                    <select required value={formData.activity_id} onChange={e => setFormData({...formData, activity_id: e.target.value})} className="w-full input-industrial h-10">
+                                        <option value="">Select Activity...</option>
+                                        {metadata.activities.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block font-bold">Work Load (h)</label>
+                                    <input type="number" step="0.5" required value={formData.hours} onChange={e => setFormData({...formData, hours: e.target.value})} className="w-full input-industrial h-10" />
+                                </div>
+                            </div>
+                        </form>
+
+                        <div className="px-8 py-6 border-t border-zinc-800 bg-zinc-900/30 flex justify-end items-center gap-4">
+                            <button onClick={onClose} className="text-[10px] font-mono text-zinc-500 uppercase hover:text-zinc-200 transition-colors">Abort Session</button>
+                            <button 
+                                onClick={handleSubmit}
+                                disabled={loading}
+                                className="btn-primary flex items-center gap-2"
+                            >
+                                {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                Commiting Record
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ── Component: ERPPage (SW Sales Terminal) ──────────────────────
+        const ERPPage = ({ onBack, metadata }) => {
+            const [logs, setLogs] = useState([]);
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [loading, setLoading] = useState(true);
+
+            const fetchLogs = async () => {
+                setLoading(true);
+                try {
+                    const data = await api.get('/task-logs?limit=50');
+                    setLogs(data);
+                } catch (e) {
+                    console.warn("Backend unavailable. Fallback to mock data.");
+                    setLogs([
+                        { id: 1024, employee: { name: 'Admin User' }, work_title: 'System Initialization', work_type: { name: 'ADMIN' }, hours: 1, work_date: '2026-04-06' }
+                    ]);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            useEffect(() => { fetchLogs(); }, []);
+
+            return (
+                <div className="min-h-screen flex flex-col animate-fade-in">
+                    <header className="px-8 py-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50">
+                        <div className="flex items-center gap-4 cursor-pointer" onClick={onBack}>
+                            <div className="w-9 h-9 rounded-lg bg-zinc-900 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+                                <Cpu size={18} />
+                            </div>
+                            <div>
+                                <h1 className="text-lg font-black font-[Satoshi] tracking-tight text-zinc-100 italic uppercase leading-none">SW Sales Terminal</h1>
+                                <p className="text-[9px] font-mono text-zinc-500 uppercase mt-1 tracking-widest font-bold">Node: LOCALHOST // Protocol: AX-4</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-4">
+                             <button 
+                                onClick={() => setIsModalOpen(true)}
+                                className="btn-primary text-xs flex items-center gap-2"
+                            >
+                                <Plus size={14} /> Log Work
+                            </button>
+                        </div>
+                    </header>
+
+                    <main className="flex-1 p-8 overflow-auto">
+                        <div className="max-w-7xl mx-auto space-y-10">
+                            {/* Visual KPI Row */}
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                {[
+                                    { label: 'Session Active', val: '00:32:15', icon: Clock },
+                                    { label: 'Data Integrity', val: '99.8%', icon: Shield },
+                                    { label: 'AX Logic', val: 'STABLE', icon: Zap },
+                                    { label: 'Audit Count', val: logs.length, icon: Database },
+                                ].map((s, i) => (
+                                    <div key={i} className="glass-card p-5 flex items-center justify-between group hover:border-amber-500/30 transition-all cursor-default overflow-hidden">
+                                        <div className="space-y-1 relative z-10">
+                                            <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest font-bold">{s.label}</span>
+                                            <div className="text-xl font-black font-[Satoshi] text-zinc-200 group-hover:text-amber-500 transition-colors uppercase italic">{s.val}</div>
+                                        </div>
+                                        <s.icon size={20} className="text-zinc-800 group-hover:text-amber-500 transition-all transform group-hover:scale-110" />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Main Content Area */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                <div className="lg:col-span-8 space-y-6">
+                                    <div className="glass-card overflow-hidden shadow-2xl">
+                                        <div className="px-6 py-4 border-b border-zinc-900 bg-zinc-900/30 flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <History size={16} className="text-zinc-600" />
+                                                <h3 className="text-[10px] font-mono text-zinc-400 uppercase tracking-[0.2em] font-black italic">Historical Audit Stream</h3>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                {loading && <Loader2 size={14} className="text-amber-500 animate-spin" />}
+                                                <button onClick={fetchLogs} className="p-1.5 rounded bg-zinc-800 text-zinc-500 hover:text-amber-500 transition-colors"><Activity size={14}/></button>
+                                            </div>
+                                        </div>
+                                        <div className="overflow-x-auto">
+                                            <table className="data-grid">
+                                                <thead>
+                                                  <tr>
+                                                    <th className="pl-6">TS // ID</th>
+                                                    <th>Unit Resource</th>
+                                                    <th>Operational Log</th>
+                                                    <th className="text-right pr-6">Load (h)</th>
+                                                  </tr>
+                                                </thead>
+                                                <tbody>
+                                                  {logs.map((log, i) => (
+                                                    <tr key={i} className="hover:bg-amber-500/[0.04] transition-colors group">
+                                                      <td className="pl-6 font-mono text-[10px] text-zinc-600">
+                                                        {log.work_date} <br/> <span className="text-zinc-800 font-bold">#AX-{log.id}</span>
+                                                      </td>
+                                                      <td>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500/50" />
+                                                            <span className="font-bold text-zinc-200 group-hover:text-amber-500 transition-colors uppercase italic">
+                                                                {log.employee?.name || `NODE-${log.employee_id}`}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-[9px] font-mono text-zinc-600 ml-3.5 uppercase">{log.employee?.region || 'LOCAL'}</span>
+                                                      </td>
+                                                      <td className="max-w-md">
+                                                        <div className="text-zinc-100 font-medium text-[13px]">{log.work_title}</div>
+                                                        <div className="text-zinc-600 font-mono text-[9px] uppercase tracking-tighter truncate opacity-70 group-hover:opacity-100 transition-opacity">
+                                                            {log.domain?.name || 'GENERIC'} // {log.activity?.name || 'OPERATIONAL'}
+                                                        </div>
+                                                      </td>
+                                                      <td className="pr-6 text-right">
+                                                        <span className="text-amber-500 font-mono font-black text-sm">{log.hours.toFixed(1)}</span>
+                                                      </td>
+                                                    </tr>
+                                                  ))}
+                                                  {logs.length === 0 && !loading && (
+                                                      <tr><td colSpan="4" className="text-center py-20 text-zinc-700 font-mono uppercase tracking-[0.3em]">No Records Detected</td></tr>
+                                                  )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="lg:col-span-4 space-y-6">
+                                    <div className="glass-card p-6 border-amber-500/10 space-y-6">
+                                        <div className="flex items-center gap-3 border-b border-zinc-900 pb-4">
+                                            <Zap size={18} className="text-amber-500" />
+                                            <h3 className="text-xs font-black font-[Satoshi] text-zinc-200 uppercase italic tracking-widest">Intelligence Layer</h3>
+                                        </div>
+                                        <div className="p-4 rounded-lg bg-zinc-950/50 border border-zinc-900 text-[11px] font-mono leading-relaxed text-zinc-400">
+                                            <span className="text-amber-500 font-bold tracking-tighter">ANOMALY SCAN:</span> System is operating at nominal parameters. 2026 Predictive Logic shows high requirement for <b className="text-zinc-200">Pre-sales Architecture</b> resources.
+                                        </div>
+                                        <button onClick={() => setIsModalOpen(true)} className="w-full btn-primary text-xs flex items-center justify-center gap-3">
+                                            Initialize Protocol <ArrowRight size={14} />
+                                        </button>
+                                    </div>
+
+                                    <div className="glass-card p-6 border-zinc-800 space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <Activity size={16} className="text-zinc-600" />
+                                            <h3 className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">Node Telemetry</h3>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between text-[11px] font-mono">
+                                                <span className="text-zinc-600 uppercase">Latency</span>
+                                                <span className="text-green-500 font-bold">0.8ms</span>
+                                            </div>
+                                            <div className="h-1 bg-zinc-900 rounded-full overflow-hidden">
+                                                <div className="h-full bg-green-500/50 w-2/3" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                    <WorkRecordModal 
+                        isOpen={isModalOpen} 
+                        onClose={() => setIsModalOpen(false)} 
+                        onSuccess={fetchLogs}
+                        metadata={metadata}
+                    />
+                </div>
+            );
+        };
+
+        // ── Page: Insight Hub (Analytics Dashboard) ─────────────────────
+        const DashboardPage = ({ onBack }) => {
+            const [summary, setSummary] = useState({ total_employees: 0, total_hours: 0, avg_hours_per_employee: 0, total_regions: [] });
+
+            useEffect(() => {
+                const fetchSummary = async () => {
+                    try {
+                        const data = await api.get('/dashboard/summary');
+                        setSummary(data);
+                    } catch (e) {
+                         setSummary({ total_employees: 300, total_hours: 14820, avg_hours_per_employee: 49.4, total_regions: ['Seoul', 'Busan', 'Global'] });
+                    }
+                };
+                fetchSummary();
+            }, []);
+
+            return (
+                <div className="min-h-screen flex flex-col animate-fade-in overflow-hidden">
+                    <header className="px-8 py-6 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/50 backdrop-blur-md">
+                        <div className="flex items-center gap-4 cursor-pointer" onClick={onBack}>
+                            <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-amber-500/30 flex items-center justify-center text-amber-500">
+                                <LineChart size={20} />
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-black font-[Satoshi] italic text-zinc-100 uppercase tracking-tight leading-none">Insight Hub</h1>
+                                <p className="text-[10px] font-mono text-zinc-500 uppercase mt-1 tracking-widest font-bold">Metric Cluster // Global Ops Visualization</p>
+                            </div>
+                        </div>
+                        <button onClick={onBack} className="text-[10px] font-mono text-zinc-500 uppercase border border-zinc-800 px-4 py-2 rounded hover:text-zinc-200 transition-colors">ESC // System Hub</button>
+                    </header>
+
+                    <main className="flex-1 p-10 overflow-auto">
+                        <div className="max-w-[1400px] mx-auto space-y-12">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                {[
+                                    { label: "Resource Payload", val: summary.total_hours.toLocaleString() + "h", icon: Database },
+                                    { label: "Active Nodes", val: summary.total_employees, icon: Users },
+                                    { label: "Mean Op_Load", val: summary.avg_hours_per_employee + "h", icon: Activity },
+                                ].map((k, i) => (
+                                    <div key={i} className="glass-card p-8 flex items-center justify-between group border-zinc-800/50 hover:border-amber-500/20 transition-all">
+                                        <div className="space-y-2">
+                                            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em]">{k.label}</span>
+                                            <div className="text-4xl font-black font-[Satoshi] italic text-zinc-100 uppercase tracking-tighter">{k.val}</div>
+                                        </div>
+                                        <k.icon size={28} className="text-zinc-800 group-hover:text-amber-500 transition-all" />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                <div className="glass-card p-10 flex flex-col gap-8">
+                                    <h3 className="text-xs font-black uppercase italic text-zinc-500 tracking-widest flex items-center gap-3">
+                                        <Sparkles size={16} className="text-amber-500" /> Organizational Efficiency Stream
+                                    </h3>
+                                    <div className="h-64 w-full bg-zinc-950/50 rounded-lg flex items-end p-6 gap-3 border border-zinc-900 border-dashed">
+                                        {[40, 65, 45, 90, 75, 55, 85, 60, 40, 70, 95, 60].map((h, i) => (
+                                            <div key={i} className="flex-1 bg-amber-500/10 border-t border-x border-amber-500/20 hover:bg-amber-500/40 transition-all relative group" style={{ height: `${h}%` }}>
+                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[9px] font-mono text-zinc-700 opacity-0 group-hover:opacity-100 uppercase">M-{i+1}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="glass-card p-10 flex flex-col items-center justify-center relative overflow-hidden">
+                                     <div className="absolute top-10 left-10 text-xs font-black uppercase italic text-zinc-500 tracking-widest flex items-center gap-3">
+                                        <Target size={16} className="text-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]" /> Regional Cluster Density
+                                    </div>
+                                    <svg className="w-56 h-56 -rotate-90">
+                                        <circle cx="112" cy="112" r="90" stroke="currentColor" strokeWidth="16" fill="transparent" className="text-zinc-900" />
+                                        <circle cx="112" cy="112" r="90" stroke="currentColor" strokeWidth="16" fill="transparent" strokeDasharray="565" strokeDashoffset="150" className="text-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.4)]" />
+                                        <circle cx="112" cy="112" r="90" stroke="currentColor" strokeWidth="16" fill="transparent" strokeDasharray="565" strokeDashoffset="450" className="text-zinc-800" />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Global Density</span>
+                                        <span className="text-3xl font-black text-zinc-100 italic">CORE_REGION</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+
+        // ── Component: Landing ──────────────────────────────────────────
+        const LandingPage = ({ onEnter }) => (
+            <div className="min-h-screen flex flex-col items-center justify-center px-6 py-20 relative overflow-hidden">
+                {/* Background Decor */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
+                
+                <div className="max-w-4xl text-center mb-20 space-y-10 relative z-10">
+                    <div className="animate-fade-in inline-flex items-center gap-3 px-4 py-2 rounded-full border border-zinc-800 bg-zinc-900/50 text-[10px] font-mono text-zinc-500 uppercase tracking-[0.4em] backdrop-blur-sm shadow-2xl">
+                        <Zap size={10} className="text-amber-500 animate-pulse" />
+                        Industrial Workforce Protocol // V4.2
+                    </div>
+                    <div className="space-y-2">
+                        <h1 className="text-7xl md:text-[10rem] font-black font-[Satoshi] text-zinc-100 tracking-tighter leading-[0.85] italic uppercase animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                            Workforce<br />
+                            <span className="text-amber-500 not-italic">Intelligence</span>
+                        </h1>
+                    </div>
+                    <p className="text-xl text-zinc-500 max-w-2xl mx-auto leading-relaxed border-l-2 border-zinc-900 pl-8 text-left italic animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                        Operationalizing enterprise-wide staff mapping through high-fidelity IX visualization and real-time resource orchestration.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl w-full relative z-10">
+                    {[
+                        { title: "Sales Terminal", desc: "Access the intelligence-driven ERP portal. Log activities, execute AX taxonomy mapping, and execute strategic resource logs.", icon: Cpu, action: 'erp' },
+                        { title: "Insight Hub", desc: "Consolidated analytics for enterprise-wide resources. Monitor workforce distribution, performance metrics, and forecasts.", icon: LineChart, action: 'dash' }
+                    ].map((card, idx) => (
+                        <div 
+                            key={card.action}
+                            onClick={() => onEnter(card.action)}
+                            className="glass-card p-10 space-y-10 cursor-pointer group hover:border-amber-500/40 hover:-translate-y-2 transition-all duration-500 overflow-hidden relative animate-fade-in"
+                            style={{ animationDelay: `${0.3 + idx*0.1}s` }}
+                        >
+                            <div className="flex items-center gap-6">
+                                <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-700 group-hover:text-amber-500 group-hover:border-amber-500/20 transition-all shadow-inner">
+                                    <card.icon size={32} />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-3xl font-black italic uppercase tracking-tighter text-zinc-100 font-[Satoshi] leading-none mb-2">{card.title}</h3>
+                                    <div className="h-1 w-6 bg-zinc-800 group-hover:w-20 group-hover:bg-amber-500 transition-all duration-700" />
+                                </div>
+                            </div>
+                            <p className="text-zinc-500 text-sm leading-relaxed font-sans">{card.desc}</p>
+                            <div className="flex items-center gap-4 text-[10px] font-mono font-black uppercase text-zinc-600 group-hover:text-amber-500 tracking-[0.2em] transition-colors">
+                                Initialize Session <ArrowRight size={14} className="group-hover:translate-x-3 transition-transform duration-500" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        // ── Main App Root ───────────────────────────────────────────────
+        function App() {
+            const [view, setView] = useState('landing');
+            const [metadata, setMetadata] = useState({ employees: [], domains: [], activities: [], worktypes: [] });
+
+            useEffect(() => {
+                const fetchMetadata = async () => {
+                    try {
+                        const [emp, dom, act, wt] = await Promise.all([
+                            api.get('/employees'),
+                            api.get('/domains'),
+                            api.get('/activities'),
+                            api.get('/work-types')
+                        ]);
+                        setMetadata({ employees: emp, domains: dom, activities: act, worktypes: wt });
+                    } catch (e) {
+                        console.warn("Using fallback metadata.");
+                        setMetadata({ 
+                            employees: [{id: 1, name: 'Sample User', region: 'Seoul'}],
+                            domains: [{id: 1, name: 'Sales'}],
+                            activities: [{id: 1, name: 'Support'}],
+                            worktypes: [{id: 1, name: 'Technical'}]
+                        });
+                    }
+                };
+                fetchMetadata();
+            }, []);
+
+            if (view === 'landing') return <LandingPage onEnter={setView} />;
+            if (view === 'erp') return <ERPPage onBack={() => setView('landing')} metadata={metadata} />;
+            if (view === 'dash') return <DashboardPage onBack={() => setView('landing')} />;
+            return <div className="p-20 text-center font-mono uppercase tracking-[0.5em] text-red-500">System Error: Kernel Panic</div>;
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
 </html>

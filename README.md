@@ -1,8 +1,11 @@
 # 🏢 MIDAS SW Sales Workforce Intelligence Platform
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-amber?style=for-the-badge&logo=react&logoColor=black)](https://glory903-devsecops.github.io/it-workforce-intelligence-platform/)
+
 > **마이다스(MIDAS) SW 영업 인력 리소스 분석 및 2026 예산 예측 플랫폼**
 
 전국 10개 지역, 300명 SW 영업 담당자의 업무 리소스를 데이터 기반으로 분석하고, 2025년 운영 실적을 기반으로 2026년 예산안을 자동 산출하는 의사결정 지원 플랫폼입니다.
+
 
 ---
 
